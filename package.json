@@ -1,0 +1,25 @@
+{
+  "name": "commonform-serve-projects",
+  "description": "receive and serve information on Common Form projects",
+  "version": "0.0.0",
+  "author": "Kyle E. Mitchell <kyle@kemitchell.com> (https://kemitchell.com/)",
+  "devDependencies": {
+    "async-series": "0.0.1",
+    "bole": "^2.0.0",
+    "concat-stream": "^1.5.1",
+    "levelup": "^1.3.1",
+    "memdown": "^1.1.1",
+    "tape": "^4.4.0"
+  },
+  "files": [
+    "LICENSE",
+    "NOTICE",
+    "README.md",
+    "index.js"
+  ],
+  "license": "Apache-2.0",
+  "repository": "commonform/commonform-serve-projects",
+  "scripts": {
+    "test": "tape test/*.test.js"
+  }
+}
