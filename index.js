@@ -9,6 +9,7 @@ var parse = require('url').parse
 var path = require('path')
 var projectStore = require('level-commonform-projects')
 var some = require('async-some')
+var uuid = require('uuid')
 
 var hash = new (require('http-hash'))()
 
@@ -129,6 +130,12 @@ hash.set(
 function serveProjects(log, level) {
   var store = projectStore(level)
   return function(request, response) {
+    // Create a request-specific logger.
+    request.log = log(uuid.v4())
+    request.log.info(request)
+    request.once('end', function() {
+      request.log.info({ event: 'end', status: response.statusCode }) })
+    // Respond.
     var parsed = parse(request.url, true)
     var route = hash.get(parsed.path)
     if (route.handler) {
