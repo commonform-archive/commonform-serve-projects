@@ -4,7 +4,6 @@ var bcrypt = require('bcrypt-password')
 var concat = require('concat-stream')
 var fs = require('fs')
 var json = require('json-parse-errback')
-var meta = require('./package.json')
 var parse = require('url').parse
 var path = require('path')
 var projectStore = require('level-commonform-projects')
@@ -13,13 +12,12 @@ var uuid = require('uuid')
 
 var hash = new (require('http-hash'))()
 
-hash.set(
-  '/',
-  function(request, response) {
-    response.end(
-      JSON.stringify(
-        { service: meta.name,
-          version: meta.version })) })
+var meta = JSON.stringify(
+  { service: require('./package.json').name,
+    version: require('./package.json').version })
+
+hash.set('/', function(request, response) {
+  response.end(meta) })
 
 hash.set(
   '/publishers/:publisher/projects/:project/editions/:edition',
