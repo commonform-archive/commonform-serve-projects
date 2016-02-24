@@ -76,7 +76,10 @@ hash.set(
               response.end(JSON.stringify(project)) }
             else {
               response.statusCode = 404
-              response.end() } } }) } })
+              response.end() } } }) }
+    else {
+      response.statusCode = 405
+      response.end() }})
 
 hash.set(
   '/publishers/:publisher/projects/:project/editions/:edition/form',
@@ -102,7 +105,10 @@ hash.set(
               response.end() }
             else {
               response.statusCode = 404
-              response.end() } } }) } })
+              response.end() } } }) }
+    else {
+      response.statusCode = 405
+      response.end() }})
 
 function serveProjects(log, level) {
   var store = projectStore(level)

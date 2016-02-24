@@ -182,3 +182,42 @@ tape('GET /publishers/$publisher/$project/editions/$existing/form', function(tes
       function finish() {
         done()
         test.end() }) }) })
+
+tape('PUT /publishers/$publisher/$project/editions/$edition', function(test) {
+  test.plan(1)
+  var publisher = 'ana'
+  var project = 'nda'
+  var edition = '1e'
+  server(function(port, done) {
+    http.request(
+      { method: 'PUT',
+        port: port,
+        path:
+          ( '/publishers/' + publisher +
+            '/projects/' + project +
+            '/editions/' + edition ) },
+      function(response) {
+        test.equal(response.statusCode, 405, 'PUT -> 405')
+        done()
+        test.end() })
+      .end() }) })
+
+tape('PUT /publishers/$publisher/$project/editions/$edition/form', function(test) {
+  test.plan(1)
+  var publisher = 'ana'
+  var project = 'nda'
+  var edition = '1e'
+  server(function(port, done) {
+    http.request(
+      { method: 'PUT',
+        port: port,
+        path:
+          ( '/publishers/' + publisher +
+            '/projects/' + project +
+            '/editions/' + edition +
+            '/form' ) },
+      function(response) {
+        test.equal(response.statusCode, 405, 'PUT -> 405')
+        done()
+        test.end() })
+      .end() }) })
