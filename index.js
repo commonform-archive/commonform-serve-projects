@@ -66,6 +66,9 @@ function postProject(request, response, store, params) {
                 if (/exists/.test(error.message)) {
                   response.statusCode = 409
                   response.end() }
+                else if (/project name/i.test(error.message)) {
+                  response.statusCode = 400
+                  response.end('Invalid project name') }
                 else {
                   respond500(request, response, error) } }
               else {
