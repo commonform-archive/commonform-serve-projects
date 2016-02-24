@@ -16,11 +16,11 @@ function startTestServer(callback, port) {
   // If we are binging to a specified port, rather than a random one, print log
   // output to stdout.
   if (port !== 0) {
-    bole.output([
-      { level: 'debug', stream: process.stdout },
-      { level: 'info', stream: process.stdout },
-      { level: 'warn', stream: process.stdout },
-      { level: 'error', stream: process.stdout } ]) }
+    bole.output(
+      [ { level: 'debug', stream: process.stdout },
+        { level: 'info', stream: process.stdout },
+        { level: 'warn', stream: process.stdout },
+        { level: 'error', stream: process.stdout } ]) }
     http.createServer(handler(log, level))
       .listen(port, function() {
         // Call back with the port assigned by the operating system.
