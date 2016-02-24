@@ -47,7 +47,7 @@ tape('POST /publishers/$publisher/$invalid-project/editions/$edition', function(
   test.plan(2)
   var publisher = 'ana'
   var password = 'ana\'s password'
-  var project = 'no-slashes-allowed'
+  var project = 'no_underscores_allowed'
   var edition = '1e'
   var form = 'a'.repeat(64)
   var path =
