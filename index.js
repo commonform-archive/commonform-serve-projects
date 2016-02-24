@@ -43,8 +43,12 @@ hash.set(
                     value.form,
                     function(error) {
                       if (error) {
-                        response.statusCode = 500
-                        response.end() }
+                        if (/exists/.test(error.message)) {
+                          response.statusCode = 409
+                          response.end() }
+                        else {
+                          response.statusCode = 500
+                          response.end() } }
                       else {
                         response.statusCode = 201
                         response.setHeader(
