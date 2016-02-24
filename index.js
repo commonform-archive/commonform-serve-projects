@@ -21,61 +21,67 @@ hash.set('/', function(request, response) {
 
 hash.set(
   '/publishers/:publisher/projects/:project/editions/:edition',
-  function(request, response, store, params) {
-    var publisher = params.publisher
-    var project = params.project
-    var edition = params.edition
+  function(request, response) {
     if (request.method === 'POST') {
-      var handler = requireAuthorization(
-        function(request, response, store) {
-          request.pipe(concat(function(buffer) {
-            json(buffer, function(error, value) {
-              if (error) {
-                request.log.info('Invalid JSON')
-                respond400(response) }
-              else {
-                if (value.hasOwnProperty('form')) {
-                  store.putProject(
-                    publisher,
-                    project,
-                    edition,
-                    value.form,
-                    function(error) {
-                      if (error) {
-                        if (/exists/.test(error.message)) {
-                          response.statusCode = 409
-                          response.end() }
-                        else {
-                          respond500(request, response, error) } }
-                      else {
-                        response.statusCode = 201
-                        response.setHeader(
-                          'Location',
-                          ( '/publishers/' + publisher +
-                            '/projects/' + project +
-                            '/editions/' + edition ))
-                        response.end() } }) }
-                else {
-                  respond400(response) } } }) })) })
-      handler.apply(this, arguments) }
+      requireAuthorization(postProject).apply(this, arguments) }
     else if (request.method === 'GET') {
-      store.getProject(
-        publisher,
-        project,
-        edition,
-        function(error, project) {
-          if (error) {
-            respond500(request, response, error) }
-          else {
-            if (project) {
-              response.setHeader('Content-Type', 'application/json')
-              response.end(JSON.stringify(project)) }
-            else {
-              response.statusCode = 404
-              response.end() } } }) }
+      getProject.apply(this, arguments) }
     else {
       response.statusCode = 405
       response.end() }})
+
+function postProject(request, response, store, params) {
+  var publisher = params.publisher
+  var project = params.project
+  var edition = params.edition
+  request.pipe(concat(function(buffer) {
+    json(buffer, function(error, value) {
+      if (error) {
+        request.log.info('Invalid JSON')
+        respond400(response) }
+      else {
+        if (value.hasOwnProperty('form')) {
+          store.putProject(
+            publisher,
+            project,
+            edition,
+            value.form,
+            function(error) {
+              if (error) {
+                if (/exists/.test(error.message)) {
+                  response.statusCode = 409
+                  response.end() }
+                else {
+                  respond500(request, response, error) } }
+              else {
+                response.statusCode = 201
+                response.setHeader(
+                  'Location',
+                  ( '/publishers/' + publisher +
+                    '/projects/' + project +
+                    '/editions/' + edition ))
+                response.end() } }) }
+        else {
+          respond400(response) } } }) })) }
+
+function getProject(request, response, store, params) {
+  var publisher = params.publisher
+  var project = params.project
+  var edition = params.edition
+  store.getProject(
+    publisher,
+    project,
+    edition,
+    function(error, project) {
+      if (error) {
+        respond500(request, response, error) }
+      else {
+        if (project) {
+          response.setHeader('Content-Type', 'application/json')
+          response.end(JSON.stringify(project)) }
+        else {
+          response.statusCode = 404
+          response.end() } } }) }
 
 hash.set(
   '/publishers/:publisher/projects/:project/editions/:edition/form',
