@@ -103,7 +103,7 @@ tape('GET /publishers/$publisher/$project/editions/$nonexistent', function(test)
         test.end() })
       .end() }) })
 
-tape('GET /publishers/$publisher/$project/editions/$nonexistent', function(test) {
+tape('GET /publishers/$publisher/$project/editions/$existing', function(test) {
   test.plan(3)
   var publisher = 'ana'
   var password = 'ana\'s password'
