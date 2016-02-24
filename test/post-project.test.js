@@ -28,6 +28,29 @@ tape('POST /publishers/$publisher/$project/editions/$edition', function(test) {
         test.end() })
       .end(JSON.stringify({ form: form })) }) })
 
+tape('POST /publishers/$publisher/$project/editions/$edition with bad password', function(test) {
+  test.plan(1)
+  var publisher = 'ana'
+  var password = 'not ana\'s password'
+  var project = 'nda'
+  var edition = '1e'
+  var form = 'a'.repeat(64)
+  var path =
+    ( '/publishers/' + publisher +
+      '/projects/' + project +
+      '/editions/' + edition )
+  server(function(port, done) {
+    http.request(
+      { auth: ( publisher + ':' + password ),
+        method: 'POST',
+        port: port,
+        path: path },
+      function(response) {
+        test.equal(response.statusCode, 401, 'POST -> 401')
+        done()
+        test.end() })
+      .end(JSON.stringify({ form: form })) }) })
+
 tape('POST /publishers/$publisher/$project/editions/$existing', function(test) {
   test.plan(3)
   var publisher = 'ana'
