@@ -53,7 +53,7 @@ function postProject(request, response, store, params) {
     json(buffer, function(error, value) {
       if (error) {
         request.log.info('Invalid JSON')
-        respond400(response) }
+        respond400(response, 'Invalid JSON') }
       else {
         if (value.hasOwnProperty('form')) {
           store.putProject(
@@ -228,6 +228,6 @@ function respond500(request, response, error) {
   response.statusCode = 500
   response.end() }
 
-function respond400(response) {
+function respond400(response, message) {
   response.statusCode = 400
-  response.end() }
+  response.end(message || '') }
