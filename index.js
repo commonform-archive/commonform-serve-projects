@@ -86,20 +86,20 @@ function getProject(request, response, store, params) {
   var publisher = params.publisher
   var project = params.project
   var edition = params.edition
-  store.getProject(
-    publisher,
-    project,
-    edition,
-    function(error, project) {
-      if (error) {
-        respond500(request, response, error) }
+  var fetch = (
+    ( edition === 'current' )
+      ? store.getCurrentEdition.bind(store, publisher, project)
+      : store.getProject.bind(store, publisher, project, edition) )
+  fetch(function(error, project) {
+    if (error) {
+      respond500(request, response, error) }
+    else {
+      if (project) {
+        response.setHeader('Content-Type', 'application/json')
+        response.end(JSON.stringify(project)) }
       else {
-        if (project) {
-          response.setHeader('Content-Type', 'application/json')
-          response.end(JSON.stringify(project)) }
-        else {
-          response.statusCode = 404
-          response.end() } } }) }
+        response.statusCode = 404
+        response.end() } } }) }
 
 hash.set(
   '/publishers/:publisher/projects/:project/editions/:edition/form',
