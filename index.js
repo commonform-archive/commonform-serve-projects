@@ -49,9 +49,7 @@ hash.set(
                           response.statusCode = 409
                           response.end() }
                         else {
-                          response.statusCode = 500
-                          request.log.error(error)
-                          response.end() } }
+                          respond500(request, response, error) } }
                       else {
                         response.statusCode = 201
                         response.setHeader(
@@ -71,9 +69,7 @@ hash.set(
         edition,
         function(error, project) {
           if (error) {
-            response.statusCode = 500
-            request.log.error(error)
-            response.end() }
+            respond500(request, response, error) }
           else {
             if (project) {
               response.setHeader('Content-Type', 'application/json')
@@ -98,9 +94,7 @@ hash.set(
         edition,
         function(error, project) {
           if (error) {
-            response.statusCode = 500
-            request.log.error(error)
-            response.end() }
+            respond500(request, response, error) }
           else {
             if (project) {
               response.statusCode = 301
@@ -122,9 +116,7 @@ hash.set(
     if (request.method === 'GET') {
       store.getProjects(form, function(error, projects) {
         if (error) {
-          response.statusCode = 500
-          request.log.error(error)
-          response.end() }
+          respond500(request, response, error) }
         else {
           response.setHeader('Content-Type', 'application/json')
           response.end(JSON.stringify(projects)) } }) }
@@ -161,9 +153,7 @@ function requireAuthorization(handler) {
       else {
         checkPassword(publisher, parsed.password, function(error, valid) {
           if (error) {
-            response.statuCode = 500
-            request.log.error(error)
-            response.end() }
+            respond500(request, response, error) }
           else {
             if (valid) {
               handler.apply(this, handlerArguments) }
@@ -212,3 +202,8 @@ function parseAuthorization(header) {
     return {
       user: components[0],
       password: components[1] } } }
+
+function respond500(request, response, error) {
+  request.log.error(error)
+  response.statusCode = 500
+  response.end() }
