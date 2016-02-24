@@ -33,9 +33,8 @@ hash.set(
           request.pipe(concat(function(buffer) {
             json(buffer, function(error, value) {
               if (error) {
-                response.statusCode = 400
                 request.log.info('Invalid JSON')
-                response.end() }
+                respond400(response) }
               else {
                 if (value.hasOwnProperty('form')) {
                   store.putProject(
@@ -59,8 +58,7 @@ hash.set(
                             '/editions/' + edition ))
                         response.end() } }) }
                 else {
-                  response.statusCode = 400
-                  response.end() } } }) })) })
+                  respond400(response) } } }) })) })
       handler.apply(this, arguments) }
     else if (request.method === 'GET') {
       store.getProject(
@@ -206,4 +204,8 @@ function parseAuthorization(header) {
 function respond500(request, response, error) {
   request.log.error(error)
   response.statusCode = 500
+  response.end() }
+
+function respond400(response) {
+  response.statusCode = 400
   response.end() }
