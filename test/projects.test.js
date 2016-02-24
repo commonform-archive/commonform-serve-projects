@@ -368,6 +368,48 @@ tape('GET /publishers/$publisher/$project/editions/current/form', function(test)
         done()
         test.end() }) }) })
 
+tape('GET /publishers/$publisher/$project/editions/latest/form', function(test) {
+  test.plan(3)
+  var publisher = 'ana'
+  var password = 'ana\'s password'
+  var project = 'nda'
+  var edition = '1e'
+  var form = 'a'.repeat(64)
+  server(function(port, done) {
+    series(
+      [ function putProject(done) {
+          http.request(
+            { auth: ( publisher + ':' + password ),
+              method: 'POST',
+              port: port,
+              path:
+                ( '/publishers/' + publisher +
+                  '/projects/' + project +
+                  '/editions/' + edition ) },
+            function(response) {
+              test.equal(response.statusCode, 201, 'POST 201')
+              done() })
+            .end(JSON.stringify({ form: form })) },
+        function getProject(done) {
+          http.request(
+            { method: 'GET',
+              port: port,
+              path:
+                ( '/publishers/' + publisher +
+                  '/projects/' + project +
+                  '/editions/latest/form' ) },
+            function(response) {
+              test.equal(response.statusCode, 301, 'GET 301')
+              test.equal(
+                response.headers.location,
+                ( 'https://api.commonform.org/forms/' + form ),
+                'GET api.commonform.org/forms/...')
+              done() })
+            .end() } ],
+      function finish() {
+        done()
+        test.end() }) }) })
+
 tape('PUT /publishers/$publisher/$project/editions/$edition', function(test) {
   test.plan(1)
   var publisher = 'ana'

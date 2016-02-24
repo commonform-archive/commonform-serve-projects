@@ -111,10 +111,13 @@ hash.set(
     var project = params.project
     var edition = params.edition
     if (request.method === 'GET') {
-      var fetch = (
-        ( edition === 'current' )
-          ? store.getCurrentEdition.bind(store, publisher, project)
-          : store.getProject.bind(store, publisher, project, edition) )
+      var fetch
+      if (edition === 'current') {
+        fetch = store.getCurrentEdition.bind(store, publisher, project) }
+      else if (edition === 'latest') {
+        fetch = store.getLatestEdition.bind(store, publisher, project) }
+      else {
+        fetch = store.getProject.bind(store, publisher, project, edition) }
       fetch(function(error, project) {
         if (error) {
           respond500(request, response, error) }
