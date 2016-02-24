@@ -219,3 +219,47 @@ tape('PUT /publishers/$publisher/$project/editions/$edition/form', function(test
         done()
         test.end() })
       .end() }) })
+
+tape('GET /forms/$form/projects', function(test) {
+  test.plan(2)
+  var publisher = 'ana'
+  var password = 'ana\'s password'
+  var project = 'nda'
+  var edition = '1e'
+  var form = 'a'.repeat(64)
+  server(function(port, done) {
+    series(
+      [ function putProject(done) {
+          http.request(
+            { auth: ( publisher + ':' + password ),
+              method: 'POST',
+              port: port,
+              path:
+                ( '/publishers/' + publisher +
+                  '/projects/' + project +
+                  '/editions/' + edition ) },
+            function(response) {
+              test.equal(response.statusCode, 201, 'POST 201')
+              done() })
+            .end(JSON.stringify({ form: form })) },
+        function getProjects(done) {
+          http.request(
+            { method: 'GET',
+              port: port,
+              path: ( '/forms/' + form + '/projects' ) },
+            function(response) {
+              response.pipe(concat(function(buffer) {
+                var responseBody = JSON.parse(buffer)
+                test.same(
+                  responseBody,
+                  [ { publisher: publisher,
+                      project: project,
+                      edition: edition,
+                      form: form } ],
+                  'GET projects JSON')
+                done() })) })
+            .end() } ],
+      function finish() {
+        done()
+        test.end() }) }) })
+

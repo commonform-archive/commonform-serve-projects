@@ -110,6 +110,22 @@ hash.set(
       response.statusCode = 405
       response.end() }})
 
+hash.set(
+  '/forms/:form/projects',
+  function(request, response, store, params) {
+    var form = params.form
+    if (request.method === 'GET') {
+      store.getProjects(form, function(error, projects) {
+        if (error) {
+          response.statusCode = 500
+          response.end() }
+        else {
+          response.setHeader('Content-Type', 'application/json')
+          response.end(JSON.stringify(projects)) } }) }
+    else {
+      response.statusCode = 405
+      response.end() }})
+
 function serveProjects(log, level) {
   var store = projectStore(level)
   return function(request, response) {
