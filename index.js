@@ -108,23 +108,23 @@ hash.set(
     var project = params.project
     var edition = params.edition
     if (request.method === 'GET') {
-      store.getProject(
-        publisher,
-        project,
-        edition,
-        function(error, project) {
-          if (error) {
-            respond500(request, response, error) }
+      var fetch = (
+        ( edition === 'current' )
+          ? store.getCurrentEdition.bind(store, publisher, project)
+          : store.getProject.bind(store, publisher, project, edition) )
+      fetch(function(error, project) {
+        if (error) {
+          respond500(request, response, error) }
+        else {
+          if (project) {
+            response.statusCode = 301
+            response.setHeader(
+              'Location',
+              ( 'https://api.commonform.org/forms/' + project.form ))
+            response.end() }
           else {
-            if (project) {
-              response.statusCode = 301
-              response.setHeader(
-                'Location',
-                ( 'https://api.commonform.org/forms/' + project.form ))
-              response.end() }
-            else {
-              response.statusCode = 404
-              response.end() } } }) }
+            response.statusCode = 404
+            response.end() } } }) }
     else {
       response.statusCode = 405
       response.end() }})
