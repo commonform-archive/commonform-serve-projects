@@ -20,6 +20,14 @@
   "license": "Apache-2.0",
   "repository": "commonform/commonform-serve-projects",
   "scripts": {
-    "test": "tape test/*.test.js"
+    "test": "USERS=./test/USERS tape test/*.test.js"
+  },
+  "dependencies": {
+    "async-some": "^1.0.2",
+    "bcrypt-password": "^1.0.2",
+    "concat-stream": "^1.5.1",
+    "http-hash": "^2.0.0",
+    "json-parse-errback": "^1.0.1",
+    "level-commonform-projects": "^1.1.0"
   }
 }
