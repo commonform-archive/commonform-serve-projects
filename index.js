@@ -34,6 +34,7 @@ hash.set(
             json(buffer, function(error, value) {
               if (error) {
                 response.statusCode = 400
+                request.log.info('Invalid JSON')
                 response.end() }
               else {
                 if (value.hasOwnProperty('form')) {
@@ -49,6 +50,7 @@ hash.set(
                           response.end() }
                         else {
                           response.statusCode = 500
+                          request.log.error(error)
                           response.end() } }
                       else {
                         response.statusCode = 201
@@ -70,6 +72,7 @@ hash.set(
         function(error, project) {
           if (error) {
             response.statusCode = 500
+            request.log.error(error)
             response.end() }
           else {
             if (project) {
@@ -96,6 +99,7 @@ hash.set(
         function(error, project) {
           if (error) {
             response.statusCode = 500
+            request.log.error(error)
             response.end() }
           else {
             if (project) {
@@ -119,6 +123,7 @@ hash.set(
       store.getProjects(form, function(error, projects) {
         if (error) {
           response.statusCode = 500
+          request.log.error(error)
           response.end() }
         else {
           response.setHeader('Content-Type', 'application/json')
@@ -157,6 +162,7 @@ function requireAuthorization(handler) {
         checkPassword(publisher, parsed.password, function(error, valid) {
           if (error) {
             response.statuCode = 500
+            request.log.error(error)
             response.end() }
           else {
             if (valid) {
