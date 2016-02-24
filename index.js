@@ -22,10 +22,13 @@ hash.set(
 
 hash.set(
   '/publishers/:publisher/projects/:project/editions/:edition',
-  function(request, response) {
+  function(request, response, store, params) {
+    var publisher = params.publisher
+    var project = params.project
+    var edition = params.edition
     if (request.method === 'POST') {
       var handler = requireAuthorization(
-        function(request, response, store, params) {
+        function(request, response, store) {
           request.pipe(concat(function(buffer) {
             json(buffer, function(error, value) {
               if (error) {
@@ -33,9 +36,6 @@ hash.set(
                 response.end() }
               else {
                 if (value.hasOwnProperty('form')) {
-                  var publisher = params.publisher
-                  var project = params.project
-                  var edition = params.edition
                   store.putProject(
                     publisher,
                     project,
@@ -58,7 +58,21 @@ hash.set(
                   response.end() } } }) })) })
       handler.apply(this, arguments) }
     else if (request.method === 'GET') {
-      response.end() } })
+      store.getProject(
+        publisher,
+        project,
+        edition,
+        function(error, project) {
+          if (error) {
+            response.statusCode = 500
+            response.end() }
+          else {
+            if (project) {
+              response.setHeader('Content-Type', 'application/json')
+              response.end(JSON.stringify(project)) }
+            else {
+              response.statusCode = 404
+              response.end() } } }) } })
 
 function serveProjects(log, level) {
   var store = projectStore(level)
