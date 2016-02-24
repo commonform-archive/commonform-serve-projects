@@ -78,6 +78,32 @@ hash.set(
               response.statusCode = 404
               response.end() } } }) } })
 
+hash.set(
+  '/publishers/:publisher/projects/:project/editions/:edition/form',
+  function(request, response, store, params) {
+    var publisher = params.publisher
+    var project = params.project
+    var edition = params.edition
+    if (request.method === 'GET') {
+      store.getProject(
+        publisher,
+        project,
+        edition,
+        function(error, project) {
+          if (error) {
+            response.statusCode = 500
+            response.end() }
+          else {
+            if (project) {
+              response.statusCode = 301
+              response.setHeader(
+                'Location',
+                ( 'https://api.commonform.org/forms/' + project.form ))
+              response.end() }
+            else {
+              response.statusCode = 404
+              response.end() } } }) } })
+
 function serveProjects(log, level) {
   var store = projectStore(level)
   return function(request, response) {
