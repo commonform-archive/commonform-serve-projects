@@ -28,7 +28,7 @@
     "concat-stream": "^1.5.1",
     "http-hash": "^2.0.0",
     "json-parse-errback": "^1.0.1",
-    "level-commonform-projects": "^2.0.0",
+    "level-commonform-projects": "^2.1.0",
     "uuid": "^2.0.1"
   }
 }

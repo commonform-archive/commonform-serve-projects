@@ -136,6 +136,20 @@ hash.set(
       response.end() }})
 
 hash.set(
+  '/publishers',
+  function(request, response, store) {
+    if (request.method === 'GET') {
+      store.getPublishers(function(error, publishers) {
+        if (error) {
+          respond500(request, response, error) }
+        else {
+          response.setHeader('Content-Type', 'application/json')
+          response.end(JSON.stringify(publishers)) } }) }
+    else {
+      response.statusCode = 405
+      response.end() }})
+
+hash.set(
   '/publishers/:publisher/projects',
   function(request, response, store, params) {
     var publisher = params.publisher
