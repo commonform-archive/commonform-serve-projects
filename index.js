@@ -18,6 +18,7 @@ module.exports = serveProjects
 var bcrypt = require('bcrypt-password')
 var concat = require('concat-stream')
 var fs = require('fs')
+var hash = require('http-hash')
 var json = require('json-parse-errback')
 var parse = require('url').parse
 var path = require('path')
@@ -25,25 +26,24 @@ var projectStore = require('level-commonform-projects')
 var some = require('async-some')
 var uuid = require('uuid')
 
-var hash = new (require('http-hash'))()
-
 var meta = JSON.stringify(
   { service: require('./package.json').name,
     version: require('./package.json').version })
 
-hash.set('/', function(request, response) {
+var routes = { get: hash(), post: hash() }
+
+routes.get.set('/', function(request, response) {
   response.end(meta) })
 
-hash.set(
+routes.post.set(
   '/publishers/:publisher/projects/:project/editions/:edition',
-  function(request, response) {
-    if (request.method === 'POST') {
-      requireAuthorization(postProject).apply(this, arguments) }
-    else if (request.method === 'GET') {
-      getProject.apply(this, arguments) }
-    else {
-      response.statusCode = 405
-      response.end() }})
+  function() {
+    requireAuthorization(postProject).apply(this, arguments) })
+
+routes.get.set(
+  '/publishers/:publisher/projects/:project/editions/:edition',
+  function() {
+    getProject.apply(this, arguments) })
 
 function postProject(request, response, store, params) {
   var publisher = params.publisher
@@ -104,80 +104,64 @@ function getProject(request, response, store, params) {
         response.statusCode = 404
         response.end() } } }) }
 
-hash.set(
+routes.get.set(
   '/publishers/:publisher/projects/:project/editions/:edition/form',
   function(request, response, store, params) {
     var publisher = params.publisher
     var project = params.project
     var edition = params.edition
-    if (request.method === 'GET') {
-      var fetch
-      if (edition === 'current') {
-        fetch = store.getCurrentEdition.bind(store, publisher, project) }
-      else if (edition === 'latest') {
-        fetch = store.getLatestEdition.bind(store, publisher, project) }
-      else {
-        fetch = store.getProject.bind(store, publisher, project, edition) }
-      fetch(function(error, project) {
-        if (error) {
-          respond500(request, response, error) }
-        else {
-          if (project) {
-            response.statusCode = 301
-            response.setHeader(
-              'Location',
-              ( 'https://api.commonform.org/forms/' + project.form ))
-            response.end() }
-          else {
-            response.statusCode = 404
-            response.end() } } }) }
+    var fetch
+    if (edition === 'current') {
+      fetch = store.getCurrentEdition.bind(store, publisher, project) }
+    else if (edition === 'latest') {
+      fetch = store.getLatestEdition.bind(store, publisher, project) }
     else {
-      response.statusCode = 405
-      response.end() }})
+      fetch = store.getProject.bind(store, publisher, project, edition) }
+    fetch(function(error, project) {
+      if (error) {
+        respond500(request, response, error) }
+      else {
+        if (project) {
+          response.statusCode = 301
+          response.setHeader(
+            'Location',
+            ( 'https://api.commonform.org/forms/' + project.form ))
+          response.end() }
+        else {
+          response.statusCode = 404
+          response.end() } } }) })
 
-hash.set(
+routes.get.set(
   '/publishers',
   function(request, response, store) {
-    if (request.method === 'GET') {
-      store.getPublishers(function(error, publishers) {
-        if (error) {
-          respond500(request, response, error) }
-        else {
-          response.setHeader('Content-Type', 'application/json')
-          response.end(JSON.stringify(publishers)) } }) }
-    else {
-      response.statusCode = 405
-      response.end() }})
+    store.getPublishers(function(error, publishers) {
+      if (error) {
+        respond500(request, response, error) }
+      else {
+        response.setHeader('Content-Type', 'application/json')
+        response.end(JSON.stringify(publishers)) } }) })
 
-hash.set(
+routes.get.set(
   '/publishers/:publisher/projects',
   function(request, response, store, params) {
     var publisher = params.publisher
-    if (request.method === 'GET') {
-      store.getPublisherProjects(publisher, function(error, projects) {
-        if (error) {
-          respond500(request, response, error) }
-        else {
-          response.setHeader('Content-Type', 'application/json')
-          response.end(JSON.stringify(projects)) } }) }
-    else {
-      response.statusCode = 405
-      response.end() }})
+    store.getPublisherProjects(publisher, function(error, projects) {
+      if (error) {
+        respond500(request, response, error) }
+      else {
+        response.setHeader('Content-Type', 'application/json')
+        response.end(JSON.stringify(projects)) } }) })
 
-hash.set(
+routes.get.set(
   '/forms/:form/projects',
   function(request, response, store, params) {
     var form = params.form
-    if (request.method === 'GET') {
-      store.getProjects(form, function(error, projects) {
-        if (error) {
-          respond500(request, response, error) }
-        else {
-          response.setHeader('Content-Type', 'application/json')
-          response.end(JSON.stringify(projects)) } }) }
-    else {
-      response.statusCode = 405
-      response.end() }})
+    store.getProjects(form, function(error, projects) {
+      if (error) {
+        respond500(request, response, error) }
+      else {
+        response.setHeader('Content-Type', 'application/json')
+        response.end(JSON.stringify(projects)) } }) })
 
 function serveProjects(log, level) {
   var store = projectStore(level)
@@ -189,12 +173,17 @@ function serveProjects(log, level) {
       request.log.info({ event: 'end', status: response.statusCode }) })
     // Respond.
     var parsed = parse(request.url, true)
-    var route = hash.get(parsed.path)
-    if (route.handler) {
-      route.handler(request, response, store, route.params, route.splat) }
+    var hash = routes[request.method.toLowerCase()]
+    if (hash) {
+      var route = hash.get(parsed.path)
+      if (route.handler) {
+        route.handler(request, response, store, route.params, route.splat) }
+      else {
+        response.statusCode = 404
+        response.end() } }
     else {
-      response.statusCode = 404
-      response.end() } } }
+      response.statusCode = 405
+      response.end() }} }
 
 function requireAuthorization(handler) {
   return function(request, response, store, params) {
