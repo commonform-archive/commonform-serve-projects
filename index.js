@@ -45,10 +45,10 @@ routes.get.set(
   function() {
     getProject.apply(this, arguments) })
 
-function postProject(request, response, store, params) {
-  var publisher = params.publisher
-  var project = params.project
-  var edition = params.edition
+function postProject(request, response, store, parameters) {
+  var publisher = parameters.publisher
+  var project = parameters.project
+  var edition = parameters.edition
   request.pipe(concat(function(buffer) {
     json(buffer, function(error, value) {
       if (error) {
@@ -82,10 +82,10 @@ function postProject(request, response, store, params) {
         else {
           respond400(response) } } }) })) }
 
-function getProject(request, response, store, params) {
-  var publisher = params.publisher
-  var project = params.project
-  var edition = params.edition
+function getProject(request, response, store, parameters) {
+  var publisher = parameters.publisher
+  var project = parameters.project
+  var edition = parameters.edition
   var fetch
   if (edition === 'current') {
     fetch = store.getCurrentEdition.bind(store, publisher, project) }
@@ -106,10 +106,10 @@ function getProject(request, response, store, params) {
 
 routes.get.set(
   '/publishers/:publisher/projects/:project/editions/:edition/form',
-  function(request, response, store, params) {
-    var publisher = params.publisher
-    var project = params.project
-    var edition = params.edition
+  function(request, response, store, parameters) {
+    var publisher = parameters.publisher
+    var project = parameters.project
+    var edition = parameters.edition
     var fetch
     if (edition === 'current') {
       fetch = store.getCurrentEdition.bind(store, publisher, project) }
@@ -143,8 +143,8 @@ routes.get.set(
 
 routes.get.set(
   '/publishers/:publisher/projects',
-  function(request, response, store, params) {
-    var publisher = params.publisher
+  function(request, response, store, parameters) {
+    var publisher = parameters.publisher
     store.getPublisherProjects(publisher, function(error, projects) {
       if (error) {
         respond500(request, response, error) }
@@ -154,8 +154,8 @@ routes.get.set(
 
 routes.get.set(
   '/forms/:form/projects',
-  function(request, response, store, params) {
-    var form = params.form
+  function(request, response, store, parameters) {
+    var form = parameters.form
     store.getProjects(form, function(error, projects) {
       if (error) {
         respond500(request, response, error) }
@@ -186,9 +186,9 @@ function serveProjects(log, level) {
       response.end() }} }
 
 function requireAuthorization(handler) {
-  return function(request, response, store, params) {
+  return function(request, response, store, parameters) {
     var handlerArguments = arguments
-    var publisher = params.publisher
+    var publisher = parameters.publisher
     var authorization = request.headers.authorization
     if (authorization) {
       var parsed = parseAuthorization(authorization)
