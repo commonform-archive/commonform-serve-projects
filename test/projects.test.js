@@ -19,7 +19,7 @@ var series = require('async-series')
 var server = require('./server')
 var tape = require('tape')
 
-tape('POST /publishers/$publisher/$project/editions/$edition', function(test) {
+tape('POST /publishers/$publisher/projects/$project/editions/$edition', function(test) {
   test.plan(2)
   var publisher = 'ana'
   var password = 'ana\'s password'
@@ -43,7 +43,7 @@ tape('POST /publishers/$publisher/$project/editions/$edition', function(test) {
         test.end() })
       .end(JSON.stringify({ form: form })) }) })
 
-tape('POST /publishers/$publisher/$invalid-project/editions/$edition', function(test) {
+tape('POST /publishers/$publisher/projects/$invalid-project/editions/$edition', function(test) {
   test.plan(2)
   var publisher = 'ana'
   var password = 'ana\'s password'
@@ -68,7 +68,7 @@ tape('POST /publishers/$publisher/$invalid-project/editions/$edition', function(
           test.end() })) })
       .end(JSON.stringify({ form: form })) }) })
 
-tape('POST /publishers/$publisher/$project/editions/$edition with invalid JSON', function(test) {
+tape('POST /publishers/$publisher/projects/$project/editions/$edition with invalid JSON', function(test) {
   test.plan(2)
   var publisher = 'ana'
   var password = 'ana\'s password'
@@ -93,7 +93,7 @@ tape('POST /publishers/$publisher/$project/editions/$edition with invalid JSON',
           test.end() })) })
       .end('The form is ' + form) }) })
 
-tape('POST /publishers/$publisher/$project/editions/$edition with bad password', function(test) {
+tape('POST /publishers/$publisher/projects/$project/editions/$edition with bad password', function(test) {
   test.plan(1)
   var publisher = 'ana'
   var password = 'not ana\'s password'
@@ -116,7 +116,7 @@ tape('POST /publishers/$publisher/$project/editions/$edition with bad password',
         test.end() })
       .end(JSON.stringify({ form: form })) }) })
 
-tape('POST /publishers/$publisher/$project/editions/$existing', function(test) {
+tape('POST /publishers/$publisher/projects/$project/editions/$existing', function(test) {
   test.plan(2)
   var publisher = 'ana'
   var password = 'ana\'s password'
@@ -148,7 +148,7 @@ tape('POST /publishers/$publisher/$project/editions/$existing', function(test) {
         done()
         test.end() }) }) })
 
-tape('GET /publishers/$publisher/$project/editions/$nonexistent', function(test) {
+tape('GET /publishers/$publisher/projects/$project/editions/$nonexistent', function(test) {
   test.plan(1)
   var publisher = 'ana'
   var project = 'nda'
@@ -167,7 +167,7 @@ tape('GET /publishers/$publisher/$project/editions/$nonexistent', function(test)
         test.end() })
       .end() }) })
 
-tape('GET /publishers/$publisher/$project/editions/$existing', function(test) {
+tape('GET /publishers/$publisher/projects/$project/editions/$existing', function(test) {
   test.plan(2)
   var publisher = 'ana'
   var password = 'ana\'s password'
@@ -203,7 +203,7 @@ tape('GET /publishers/$publisher/$project/editions/$existing', function(test) {
         done()
         test.end() }) }) })
 
-tape('GET /publishers/$publisher/$project/editions/current', function(test) {
+tape('GET /publishers/$publisher/projects/$project/editions/current', function(test) {
   test.plan(2)
   var publisher = 'ana'
   var password = 'ana\'s password'
@@ -243,7 +243,7 @@ tape('GET /publishers/$publisher/$project/editions/current', function(test) {
         done()
         test.end() }) }) })
 
-tape('GET /publishers/$publisher/$project/editions/latest', function(test) {
+tape('GET /publishers/$publisher/projects/$project/editions/latest', function(test) {
   test.plan(2)
   var publisher = 'ana'
   var password = 'ana\'s password'
@@ -283,7 +283,7 @@ tape('GET /publishers/$publisher/$project/editions/latest', function(test) {
         done()
         test.end() }) }) })
 
-tape('GET /publishers/$publisher/$project/editions/$existing/form', function(test) {
+tape('GET /publishers/$publisher/projects/$project/editions/$existing/form', function(test) {
   test.plan(3)
   var publisher = 'ana'
   var password = 'ana\'s password'
@@ -326,7 +326,7 @@ tape('GET /publishers/$publisher/$project/editions/$existing/form', function(tes
         done()
         test.end() }) }) })
 
-tape('GET /publishers/$publisher/$project/editions/current/form', function(test) {
+tape('GET /publishers/$publisher/projects/$project/editions/current/form', function(test) {
   test.plan(3)
   var publisher = 'ana'
   var password = 'ana\'s password'
@@ -368,7 +368,7 @@ tape('GET /publishers/$publisher/$project/editions/current/form', function(test)
         done()
         test.end() }) }) })
 
-tape('GET /publishers/$publisher/$project/editions/latest/form', function(test) {
+tape('GET /publishers/$publisher/projects/$project/editions/latest/form', function(test) {
   test.plan(3)
   var publisher = 'ana'
   var password = 'ana\'s password'
@@ -410,7 +410,7 @@ tape('GET /publishers/$publisher/$project/editions/latest/form', function(test) 
         done()
         test.end() }) }) })
 
-tape('PUT /publishers/$publisher/$project/editions/$edition', function(test) {
+tape('PUT /publishers/$publisher/projects/$project/editions/$edition', function(test) {
   test.plan(1)
   var publisher = 'ana'
   var project = 'nda'
@@ -429,7 +429,7 @@ tape('PUT /publishers/$publisher/$project/editions/$edition', function(test) {
         test.end() })
       .end() }) })
 
-tape('PUT /publishers/$publisher/$project/editions/$edition/form', function(test) {
+tape('PUT /publishers/$publisher/projects/$project/editions/$edition/form', function(test) {
   test.plan(1)
   var publisher = 'ana'
   var project = 'nda'
