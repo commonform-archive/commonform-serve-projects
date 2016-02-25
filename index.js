@@ -45,6 +45,18 @@ routes.get.set(
   function() {
     getProject.apply(this, arguments) })
 
+routes.get.set(
+  '/publishers/:publisher/projects/:project/editions',
+  function(request, response, store, parameters) {
+    var publisher = parameters.publisher
+    var project = parameters.project
+    store.getEditions(publisher, project, function(error, editions) {
+      if (error) {
+        respond500(request, response, error) }
+      else {
+        response.setHeader('Content-Type', 'application/json')
+        response.end(JSON.stringify(editions)) } }) })
+
 function postProject(request, response, store, parameters) {
   var publisher = parameters.publisher
   var project = parameters.project
