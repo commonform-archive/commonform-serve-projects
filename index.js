@@ -26,12 +26,17 @@ var projectStore = require('level-commonform-projects')
 var some = require('async-some')
 var uuid = require('uuid')
 
+// Create JSON with metadata about the serve to serve at the root path.
 var meta = JSON.stringify(
   { service: require('./package.json').name,
     version: require('./package.json').version })
 
+// Create two hash-based routers, one for POSTs and a separate one for GETs.
 var routes = { get: hash(), post: hash() }
 
+// Request route handler functions
+
+// Serve service metadata at root.
 routes.get.set('/', function(request, response) {
   response.end(meta) })
 
@@ -203,6 +208,23 @@ function serveProjects(log, level) {
       response.statusCode = 405
       response.end() }} }
 
+// Helper Functions
+
+function respond401(response) {
+  response.statusCode = 401
+  response.setHeader('WWW-Authenticate', 'Basic realm="Common Form"')
+  response.end() }
+
+function respond500(request, response, error) {
+  request.log.error(error)
+  response.statusCode = 500
+  response.end() }
+
+function respond400(response, message) {
+  response.statusCode = 400
+  response.end(message || '') }
+
+// Wrap a request handler function to check authoriztion.
 function requireAuthorization(handler) {
   return function(request, response, store, parameters) {
     var handlerArguments = arguments
@@ -224,11 +246,9 @@ function requireAuthorization(handler) {
     else {
       respond401(response) } } }
 
-function respond401(response) {
-  response.statusCode = 401
-  response.setHeader('WWW-Authenticate', 'Basic realm="Common Form"')
-  response.end() }
+// Authentication
 
+// Path of a plain text files with valid publisher names and passwords.
 var usersFile =
   ( process.env.USERS
       ? process.env.USERS
@@ -254,6 +274,7 @@ function checkPassword(publisher, password, callback) {
         else {
           callback(null, match) } }) }) }
 
+// Parse "Authorization: Basic $base64" headers.
 function parseAuthorization(header) {
   var token = header.split(/\s/).pop()
   var decoded = new Buffer(token, 'base64').toString()
@@ -264,12 +285,3 @@ function parseAuthorization(header) {
     return {
       user: components[0],
       password: components[1] } } }
-
-function respond500(request, response, error) {
-  request.log.error(error)
-  response.statusCode = 500
-  response.end() }
-
-function respond400(response, message) {
-  response.statusCode = 400
-  response.end(message || '') }
