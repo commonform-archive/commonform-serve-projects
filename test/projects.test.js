@@ -68,6 +68,31 @@ tape('POST /publishers/$publisher/projects/$invalid-project/editions/$edition', 
           test.end() })) })
       .end(JSON.stringify({ form: form })) }) })
 
+tape('POST /publishers/$publisher/projects/$project/editions/$invalid-edition', function(test) {
+  test.plan(2)
+  var publisher = 'ana'
+  var password = 'ana\'s password'
+  var project = 'da'
+  var edition = '1.0.0'
+  var form = 'a'.repeat(64)
+  var path =
+    ( '/publishers/' + publisher +
+      '/projects/' + project +
+      '/editions/' + edition )
+  server(function(port, done) {
+    http.request(
+      { auth: ( publisher + ':' + password ),
+        method: 'POST',
+        port: port,
+        path: path },
+      function(response) {
+        test.equal(response.statusCode, 400, '400')
+        response.pipe(concat(function(buffer) {
+          test.equal(buffer.toString(), 'Invalid edition', 'Invalid edition')
+          done()
+          test.end() })) })
+      .end(JSON.stringify({ form: form })) }) })
+
 tape('POST /publishers/$publisher/projects/$project/editions/$edition with invalid JSON', function(test) {
   test.plan(2)
   var publisher = 'ana'

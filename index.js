@@ -81,6 +81,9 @@ function postProject(request, response, store, parameters) {
                 else if (/project name/i.test(error.message)) {
                   response.statusCode = 400
                   response.end('Invalid project name') }
+                else if (/edition/i.test(error.message)) {
+                  response.statusCode = 400
+                  response.end('Invalid edition') }
                 else {
                   respond500(request, response, error) } }
               else {
