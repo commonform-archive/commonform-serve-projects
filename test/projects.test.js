@@ -43,6 +43,30 @@ tape('POST /publishers/$publisher/projects/$project/editions/$edition', function
         test.end() })
       .end(JSON.stringify({ form: form })) }) })
 
+tape('POST /publishers/$other-publisher/projects/$project/editions/$edition', function(test) {
+  test.plan(1)
+  var publisher = 'ana'
+  var password = 'ana\'s password'
+  var otherPublisher = 'bob'
+  var project = 'nda'
+  var edition = '1e'
+  var form = 'a'.repeat(64)
+  var path =
+    ( '/publishers/' + otherPublisher +
+      '/projects/' + project +
+      '/editions/' + edition )
+  server(function(port, done) {
+    http.request(
+      { auth: ( publisher + ':' + password ),
+        method: 'POST',
+        port: port,
+        path: path },
+      function(response) {
+        test.equal(response.statusCode, 401, '401')
+        done()
+        test.end() })
+      .end(JSON.stringify({ form: form })) }) })
+
 tape('POST /publishers/$publisher/projects/$invalid-project/editions/$edition', function(test) {
   test.plan(2)
   var publisher = 'ana'
