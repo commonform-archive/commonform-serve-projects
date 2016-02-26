@@ -93,6 +93,31 @@ tape('POST /publishers/$publisher/projects/$project/editions/$invalid-edition', 
           test.end() })) })
       .end(JSON.stringify({ form: form })) }) })
 
+tape('POST /publishers/$publisher/projects/$project/editions/$edition with invalid digest', function(test) {
+  test.plan(2)
+  var publisher = 'ana'
+  var password = 'ana\'s password'
+  var project = 'da'
+  var edition = '1e'
+  var form = 'a'.repeat(32)
+  var path =
+    ( '/publishers/' + publisher +
+      '/projects/' + project +
+      '/editions/' + edition )
+  server(function(port, done) {
+    http.request(
+      { auth: ( publisher + ':' + password ),
+        method: 'POST',
+        port: port,
+        path: path },
+      function(response) {
+        test.equal(response.statusCode, 400, '400')
+        response.pipe(concat(function(buffer) {
+          test.equal(buffer.toString(), 'Invalid form digest', 'Invalid form digest')
+          done()
+          test.end() })) })
+      .end(JSON.stringify({ form: form })) }) })
+
 tape('POST /publishers/$publisher/projects/$project/editions/$edition with invalid JSON', function(test) {
   test.plan(2)
   var publisher = 'ana'

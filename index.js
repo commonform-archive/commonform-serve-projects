@@ -84,6 +84,9 @@ function postProject(request, response, store, parameters) {
                 else if (/edition/i.test(error.message)) {
                   response.statusCode = 400
                   response.end('Invalid edition') }
+                else if (/form/i.test(error.message)) {
+                  response.statusCode = 400
+                  response.end('Invalid form digest') }
                 else {
                   respond500(request, response, error) } }
               else {
