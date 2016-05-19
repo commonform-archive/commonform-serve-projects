@@ -615,3 +615,49 @@ tape('GET /forms/$form/projects', function(test) {
         done()
         test.end() }) }) })
 
+tape('GET /forms/$form/projects for a child form', function(test) {
+  test.plan(2)
+  var publisher = 'ana'
+  var password = 'ana\'s password'
+  var project = 'nda'
+  var edition = '1e'
+  var child = { content: [ 'A test form' ] }
+  var parent = { content: [ { form: child } ] }
+  var childDigest = normalize(child).root
+  server(function(port, done) {
+    series(
+      [ function putProject(done) {
+          http.request(
+            { auth: ( publisher + ':' + password ),
+              method: 'POST',
+              port: port,
+              path:
+                ( '/publishers/' + publisher +
+                  '/projects/' + project +
+                  '/editions/' + edition ) },
+            function(response) {
+              test.equal(response.statusCode, 201, 'POST 201')
+              done() })
+            .end(JSON.stringify({ form: parent })) },
+        function getProjects(done) {
+          http.request(
+            { method: 'GET',
+              port: port,
+              path: ( '/forms/' + childDigest + '/projects' ) },
+            function(response) {
+              response.pipe(concat(function(buffer) {
+                var responseBody = JSON.parse(buffer)
+                test.same(
+                  responseBody,
+                  [ { publisher: publisher,
+                      project: project,
+                      edition: edition,
+                      root: false,
+                      digest: childDigest } ],
+                  'GET projects JSON')
+                done() })) })
+            .end() } ],
+      function finish() {
+        done()
+        test.end() }) }) })
+
