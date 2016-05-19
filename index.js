@@ -25,6 +25,7 @@ var path = require('path')
 var projectStore = require('level-commonform-projects')
 var some = require('async-some')
 var uuid = require('uuid')
+var validForm = require('commonform-validate').form
 
 // Create JSON with metadata about the serve to serve at the root path.
 var meta = JSON.stringify(
@@ -73,35 +74,39 @@ function postProject(request, response, store, parameters) {
         respond400(response, 'Invalid JSON') }
       else {
         if (value.hasOwnProperty('form')) {
-          store.putProject(
-            publisher,
-            project,
-            edition,
-            value.form,
-            function(error) {
-              if (error) {
-                if (/exists/.test(error.message)) {
-                  response.statusCode = 409
-                  response.end() }
-                else if (/project name/i.test(error.message)) {
-                  response.statusCode = 400
-                  response.end('Invalid project name') }
-                else if (/edition/i.test(error.message)) {
-                  response.statusCode = 400
-                  response.end('Invalid edition') }
-                else if (/form/i.test(error.message)) {
-                  response.statusCode = 400
-                  response.end('Invalid form digest') }
+          if (!validForm(value.form)) {
+            request.log.info('Invalid form')
+            respond400(response, 'Invalid form') }
+          else {
+            store.putProject(
+              publisher,
+              project,
+              edition,
+              value.form,
+              function(error) {
+                if (error) {
+                  if (/exists/.test(error.message)) {
+                    response.statusCode = 409
+                    response.end() }
+                  else if (/project name/i.test(error.message)) {
+                    response.statusCode = 400
+                    response.end('Invalid project name') }
+                  else if (/edition/i.test(error.message)) {
+                    response.statusCode = 400
+                    response.end('Invalid edition') }
+                  else if (/form/i.test(error.message)) {
+                    response.statusCode = 400
+                    response.end('Invalid form') }
+                  else {
+                    respond500(request, response, error) } }
                 else {
-                  respond500(request, response, error) } }
-              else {
-                response.statusCode = 201
-                response.setHeader(
-                  'Location',
-                  ( '/publishers/' + publisher +
-                    '/projects/' + project +
-                    '/editions/' + edition ))
-                response.end() } }) }
+                  response.statusCode = 201
+                  response.setHeader(
+                    'Location',
+                    ( '/publishers/' + publisher +
+                      '/projects/' + project +
+                      '/editions/' + edition ))
+                  response.end() } }) } }
         else {
           respond400(response) } } }) })) }
 
@@ -148,7 +153,7 @@ routes.get.set(
           response.statusCode = 301
           response.setHeader(
             'Location',
-            ( 'https://api.commonform.org/forms/' + project.form ))
+            ( 'https://api.commonform.org/forms/' + project.digest ))
           response.end() }
         else {
           response.statusCode = 404
@@ -176,10 +181,10 @@ routes.get.set(
         response.end(JSON.stringify(projects)) } }) })
 
 routes.get.set(
-  '/forms/:form/projects',
+  '/forms/:digest/projects',
   function(request, response, store, parameters) {
-    var form = parameters.form
-    store.getProjects(form, function(error, projects) {
+    var digest = parameters.digest
+    store.getProjects(digest, function(error, projects) {
       if (error) {
         respond500(request, response, error) }
       else {

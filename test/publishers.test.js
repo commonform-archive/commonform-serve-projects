@@ -21,7 +21,7 @@ var tape = require('tape')
 
 tape('GET /publishers/$publisher/projects/$project/editions/$existing', function(test) {
   test.plan(3)
-  var form = 'a'.repeat(64)
+  var form = { content: [ 'A test form' ] }
   server(function(port, done) {
     series(
       [ function putAnaProject(done) {

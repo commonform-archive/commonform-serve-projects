@@ -15,6 +15,7 @@
 
 var concat = require('concat-stream')
 var http = require('http')
+var normalize = require('commonform-normalize')
 var series = require('async-series')
 var server = require('./server')
 var tape = require('tape')
@@ -25,7 +26,7 @@ tape('POST /publishers/$publisher/projects/$project/editions/$edition', function
   var password = 'ana\'s password'
   var project = 'nda'
   var edition = '1e'
-  var form = 'a'.repeat(64)
+  var form = { content: [ 'A test form' ] }
   var path =
     ( '/publishers/' + publisher +
       '/projects/' + project +
@@ -50,7 +51,7 @@ tape('POST /publishers/$other-publisher/projects/$project/editions/$edition', fu
   var otherPublisher = 'bob'
   var project = 'nda'
   var edition = '1e'
-  var form = 'a'.repeat(64)
+  var form = { content: [ 'A test form' ] }
   var path =
     ( '/publishers/' + otherPublisher +
       '/projects/' + project +
@@ -73,7 +74,7 @@ tape('POST /publishers/$publisher/projects/$invalid-project/editions/$edition', 
   var password = 'ana\'s password'
   var project = 'no_underscores_allowed'
   var edition = '1e'
-  var form = 'a'.repeat(64)
+  var form = { content: [ 'A test form' ] }
   var path =
     ( '/publishers/' + publisher +
       '/projects/' + project +
@@ -98,7 +99,7 @@ tape('POST /publishers/$publisher/projects/$project/editions/$invalid-edition', 
   var password = 'ana\'s password'
   var project = 'da'
   var edition = '1.0.0'
-  var form = 'a'.repeat(64)
+  var form = { content: [ 'A test form' ] }
   var path =
     ( '/publishers/' + publisher +
       '/projects/' + project +
@@ -117,13 +118,13 @@ tape('POST /publishers/$publisher/projects/$project/editions/$invalid-edition', 
           test.end() })) })
       .end(JSON.stringify({ form: form })) }) })
 
-tape('POST /publishers/$publisher/projects/$project/editions/$edition with invalid digest', function(test) {
+tape('POST /publishers/$publisher/projects/$project/editions/$edition with invalid form', function(test) {
   test.plan(2)
   var publisher = 'ana'
   var password = 'ana\'s password'
   var project = 'da'
   var edition = '1e'
-  var form = 'a'.repeat(32)
+  var form = { blah: 'blah' }
   var path =
     ( '/publishers/' + publisher +
       '/projects/' + project +
@@ -137,7 +138,7 @@ tape('POST /publishers/$publisher/projects/$project/editions/$edition with inval
       function(response) {
         test.equal(response.statusCode, 400, '400')
         response.pipe(concat(function(buffer) {
-          test.equal(buffer.toString(), 'Invalid form digest', 'Invalid form digest')
+          test.equal(buffer.toString(), 'Invalid form', 'Invalid form')
           done()
           test.end() })) })
       .end(JSON.stringify({ form: form })) }) })
@@ -148,7 +149,7 @@ tape('POST /publishers/$publisher/projects/$project/editions/$edition with inval
   var password = 'ana\'s password'
   var project = 'nda'
   var edition = '1e'
-  var form = 'a'.repeat(64)
+  var form = { content: [ 'A test form' ] }
   var path =
     ( '/publishers/' + publisher +
       '/projects/' + project +
@@ -173,7 +174,7 @@ tape('POST /publishers/$publisher/projects/$project/editions/$edition with bad p
   var password = 'not ana\'s password'
   var project = 'nda'
   var edition = '1e'
-  var form = 'a'.repeat(64)
+  var form = { content: [ 'A test form' ] }
   var path =
     ( '/publishers/' + publisher +
       '/projects/' + project +
@@ -196,7 +197,7 @@ tape('POST /publishers/$publisher/projects/$project/editions/$existing', functio
   var password = 'ana\'s password'
   var project = 'nda'
   var edition = '1e'
-  var form = 'a'.repeat(64)
+  var form = { content: [ 'A test form' ] }
   var path =
     ( '/publishers/' + publisher +
       '/projects/' + project +
@@ -247,7 +248,8 @@ tape('GET /publishers/$publisher/projects/$project/editions/$existing', function
   var password = 'ana\'s password'
   var project = 'nda'
   var edition = '1e'
-  var form = 'a'.repeat(64)
+  var form = { content: [ 'A test form' ] }
+  var digest = normalize(form).root
   var path =
     ( '/publishers/' + publisher +
       '/projects/' + project +
@@ -270,7 +272,7 @@ tape('GET /publishers/$publisher/projects/$project/editions/$existing', function
             function(response) {
               response.pipe(concat(function(buffer) {
                 var responseBody = JSON.parse(buffer)
-                test.equal(responseBody.form, form, 'GET project JSON')
+                test.equal(responseBody.digest, digest, 'GET project JSON')
                 done() })) })
             .end() } ],
       function finish() {
@@ -283,7 +285,7 @@ tape('GET /publishers/$publisher/projects', function(test) {
   var password = 'ana\'s password'
   var project = 'nda'
   var edition = '1e'
-  var form = 'a'.repeat(64)
+  var form = { content: [ 'A test form' ] }
   server(function(port, done) {
     series(
       [ function putProject(done) {
@@ -323,7 +325,8 @@ tape('GET /publishers/$publisher/projects/$project/editions/current', function(t
   var password = 'ana\'s password'
   var project = 'nda'
   var edition = '2e'
-  var form = 'a'.repeat(64)
+  var form = { content: [ 'A test form' ] }
+  var digest = normalize(form).root
   server(function(port, done) {
     series(
       [ function putProject(done) {
@@ -350,7 +353,7 @@ tape('GET /publishers/$publisher/projects/$project/editions/current', function(t
             function(response) {
               response.pipe(concat(function(buffer) {
                 var responseBody = JSON.parse(buffer)
-                test.equal(responseBody.form, form, 'GET project JSON')
+                test.equal(responseBody.digest, digest, 'GET project JSON')
                 done() })) })
             .end() } ],
       function finish() {
@@ -363,7 +366,8 @@ tape('GET /publishers/$publisher/projects/$project/editions/latest', function(te
   var password = 'ana\'s password'
   var project = 'nda'
   var edition = '2e'
-  var form = 'a'.repeat(64)
+  var form = { content: [ 'A test form' ] }
+  var digest = normalize(form).root
   server(function(port, done) {
     series(
       [ function putProject(done) {
@@ -390,7 +394,7 @@ tape('GET /publishers/$publisher/projects/$project/editions/latest', function(te
             function(response) {
               response.pipe(concat(function(buffer) {
                 var responseBody = JSON.parse(buffer)
-                test.equal(responseBody.form, form, 'GET project JSON')
+                test.equal(responseBody.digest, digest, 'GET project JSON')
                 done() })) })
             .end() } ],
       function finish() {
@@ -403,7 +407,8 @@ tape('GET /publishers/$publisher/projects/$project/editions/$existing/form', fun
   var password = 'ana\'s password'
   var project = 'nda'
   var edition = '1e'
-  var form = 'a'.repeat(64)
+  var form = { content: [ 'A test form' ] }
+  var digest = normalize(form).root
   server(function(port, done) {
     series(
       [ function putProject(done) {
@@ -432,7 +437,7 @@ tape('GET /publishers/$publisher/projects/$project/editions/$existing/form', fun
               test.equal(response.statusCode, 301, 'GET 301')
               test.equal(
                 response.headers.location,
-                ( 'https://api.commonform.org/forms/' + form ),
+                ( 'https://api.commonform.org/forms/' + digest ),
                 'GET api.commonform.org/forms/...')
               done() })
             .end() } ],
@@ -446,7 +451,8 @@ tape('GET /publishers/$publisher/projects/$project/editions/current/form', funct
   var password = 'ana\'s password'
   var project = 'nda'
   var edition = '1e'
-  var form = 'a'.repeat(64)
+  var form = { content: [ 'A test form' ] }
+  var digest = normalize(form).root
   server(function(port, done) {
     series(
       [ function putProject(done) {
@@ -474,7 +480,7 @@ tape('GET /publishers/$publisher/projects/$project/editions/current/form', funct
               test.equal(response.statusCode, 301, 'GET 301')
               test.equal(
                 response.headers.location,
-                ( 'https://api.commonform.org/forms/' + form ),
+                ( 'https://api.commonform.org/forms/' + digest ),
                 'GET api.commonform.org/forms/...')
               done() })
             .end() } ],
@@ -488,7 +494,8 @@ tape('GET /publishers/$publisher/projects/$project/editions/latest/form', functi
   var password = 'ana\'s password'
   var project = 'nda'
   var edition = '1e'
-  var form = 'a'.repeat(64)
+  var form = { content: [ 'A test form' ] }
+  var digest = normalize(form).root
   server(function(port, done) {
     series(
       [ function putProject(done) {
@@ -516,7 +523,7 @@ tape('GET /publishers/$publisher/projects/$project/editions/latest/form', functi
               test.equal(response.statusCode, 301, 'GET 301')
               test.equal(
                 response.headers.location,
-                ( 'https://api.commonform.org/forms/' + form ),
+                ( 'https://api.commonform.org/forms/' + digest ),
                 'GET api.commonform.org/forms/...')
               done() })
             .end() } ],
@@ -569,7 +576,8 @@ tape('GET /forms/$form/projects', function(test) {
   var password = 'ana\'s password'
   var project = 'nda'
   var edition = '1e'
-  var form = 'a'.repeat(64)
+  var form = { content: [ 'A test form' ] }
+  var digest = normalize(form).root
   server(function(port, done) {
     series(
       [ function putProject(done) {
@@ -589,7 +597,7 @@ tape('GET /forms/$form/projects', function(test) {
           http.request(
             { method: 'GET',
               port: port,
-              path: ( '/forms/' + form + '/projects' ) },
+              path: ( '/forms/' + digest + '/projects' ) },
             function(response) {
               response.pipe(concat(function(buffer) {
                 var responseBody = JSON.parse(buffer)
@@ -598,7 +606,8 @@ tape('GET /forms/$form/projects', function(test) {
                   [ { publisher: publisher,
                       project: project,
                       edition: edition,
-                      form: form } ],
+                      root: true,
+                      digest: digest } ],
                   'GET projects JSON')
                 done() })) })
             .end() } ],
